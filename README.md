@@ -1,125 +1,189 @@
-TaskForge
+# TaskForge
 
-TaskForge is a service-oriented backend API for managing projects and tasks within an organization.
-It is designed to demonstrate clean backend architecture, explicit domain modeling, and reliable data handling using Python and FastAPI.
+**TaskForge** is a service-oriented backend API for managing projects and tasks within an organization.
 
-This project intentionally focuses on backend fundamentals rather than UI or authentication complexity.
+It is built to demonstrate **clean backend architecture**, **explicit domain modeling**, and **reliable data handling** using **Python** and **FastAPI**.
 
-Features
+> This project intentionally focuses on backend fundamentals rather than UI or authentication complexity.
 
-Project management
+---
 
-Task creation and assignment
+## ✨ Features
 
-Enum-backed task status (todo, in_progress, done)
+- Project management
+- Task creation and assignment
+- Enum-backed task status (`todo`, `in_progress`, `done`)
+- Controlled task status updates
+- Relational data integrity via PostgreSQL
+- Clean OpenAPI / Swagger documentation
+- Service-layer architecture
 
-Controlled task status updates
+---
 
-Relational data integrity via PostgreSQL
+## 🛠 Tech Stack
 
-Clean OpenAPI / Swagger documentation
+- **Python 3.12**
+- **FastAPI** — API framework
+- **PostgreSQL** — relational database
+- **SQLAlchemy 2.0** — ORM
+- **Alembic** — database migrations
+- **Pydantic v2** — request/response validation
 
-Service-layer architecture
+---
 
-Tech Stack
+## Why TaskForge Exists
 
-Python 3.12
+TaskForge was built to demonstrate how I design backend systems in a real-world,
+correctness-focused way — emphasizing:
 
-FastAPI – API framework
+- explicit domain boundaries
+- database-enforced invariants
+- service-layer ownership of business rules
+- migration-driven schema evolution
 
-PostgreSQL – relational database
+It intentionally avoids UI and auth layers to keep focus on backend structure,
+data integrity, and long-term maintainability.
 
-SQLAlchemy 2.0 – ORM
+---
 
-Alembic – database migrations
+## 🧱 Architecture Overview
 
-Pydantic v2 – request/response validation
+TaskForge follows a **layered, service-oriented design** that enforces separation of concerns and correctness.
 
-Architecture Overview
+    app/
+    ├── api/            # HTTP routes (FastAPI)
+    │   └── v1/
+    ├── services/       # Business logic
+    ├── models/         # SQLAlchemy ORM models
+    ├── schemas/        # Pydantic schemas
+    ├── db/             # Database session and base
+    └── main.py         # Application entrypoint
 
-TaskForge follows a layered, service-oriented design:
+---
 
-app/
-├── api/ # HTTP routes (FastAPI)
-│ └── v1/
-├── services/ # Business logic
-├── models/ # SQLAlchemy ORM models
-├── schemas/ # Pydantic schemas
-├── db/ # DB session and base
-└── main.py # Application entrypoint
+## 📐 Design Principles
 
-Key principles
+- **Thin routes**  
+  API routes handle HTTP concerns only
 
-Thin routes: API routes only handle HTTP concerns
+- **Service layer**  
+  All business logic lives in services
 
-Service layer: All business logic lives in services
+- **Explicit domain modeling**  
+  Enums, foreign keys, and constraints are enforced at the database level
 
-Explicit domain modeling: Enums, foreign keys, and constraints are enforced at the database level
+- **Migrations first**  
+  Schema changes are handled via Alembic, not runtime magic
 
-Migrations first: Schema changes are handled via Alembic, not runtime magic
+---
 
-Task Status Design
+## 🔄 Task Status Design
 
-Tasks use a PostgreSQL-backed enum for status:
+Tasks use a **PostgreSQL-backed enum** for status:
 
-todo
-in_progress
-done
+    todo
+    in_progress
+    done
 
 This ensures:
 
-Only valid states are stored
+- Only valid states are stored
+- API and database remain consistent
+- Invalid transitions fail early
 
-API and database remain consistent
+Status updates are handled via a dedicated endpoint:
 
-Invalid transitions fail early
+    PATCH /api/v1/tasks/{task_id}/status
 
-Status updates are handled via a dedicated PATCH endpoint:
+---
 
-PATCH /api/v1/tasks/{task_id}/status
+## 📡 Example API Usage
 
-Running Locally
-Prerequisites
+### Update Task Status
 
-Python 3.12+
+**Request**
 
-PostgreSQL
+    PATCH /api/v1/tasks/42/status
+    Content-Type: application/json
 
-Virtual environment recommended
+    {
+      "status": "in_progress"
+    }
 
-Setup
+**Response**
 
-git clone https://github.com/your-username/taskforge.git
+    {
+      "id": 42,
+      "title": "Write README",
+      "description": "Improve project documentation",
+      "status": "in_progress",
+      "project_id": 3
+    }
 
-cd taskforge
-python -m venv venv
-source venv/bin/activate # Windows: venv\Scripts\activate
-pip install -r requirements.txt
+---
 
-Database
+## 🚀 Running Locally
 
-Create a PostgreSQL database named taskforge and configure your connection string via environment variables.
+### Prerequisites
+
+- Python 3.12+
+- PostgreSQL
+- Virtual environment recommended
+
+---
+
+### Setup
+
+    git clone https://github.com/your-username/taskforge.git
+    cd taskforge
+
+    python -m venv venv
+    source venv/bin/activate     # Windows: venv\Scripts\activate
+    pip install -r requirements.txt
+
+---
+
+## 🗄 Database Setup
+
+Create a PostgreSQL database named `taskforge`.
+
+Configure your database connection via environment variables:
+
+    export DATABASE_URL=postgresql://user:password@localhost:5432/taskforge
+
+**Windows (PowerShell)**
+
+    $env:DATABASE_URL="postgresql://user:password@localhost:5432/taskforge"
 
 Run migrations:
 
-alembic upgrade head
+    alembic upgrade head
 
-Start the API
+---
 
-uvicorn app.main:app --reload
+## ▶️ Start the API
 
-Visit Swagger UI:
+    uvicorn app.main:app --reload
 
-http://127.0.0.1:8000/docs
+Swagger UI will be available at:
 
-Example Workflow (Swagger)
+    http://127.0.0.1:8000/docs
 
-Create a project
+---
 
-Create tasks for that project
+## 🔍 Example Workflow (Swagger)
 
-Update task status via PATCH
+1. Create a project
+2. Create tasks for that project
+3. Update task status via `PATCH`
+4. List tasks by project
 
-List tasks by project
+All interactions return **clean JSON** and **validated enum values**.
 
-All interactions return clean JSON and validated enum values.
+---
+
+## 📌 Project Scope
+
+- No authentication or authorization layer
+- No frontend UI
+- Focused purely on backend correctness, structure, and maintainability
